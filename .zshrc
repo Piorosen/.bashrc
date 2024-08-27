@@ -4,8 +4,7 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
-export ZPLUG_HOME=/usr/local/opt/zplug
+export ZPLUG_HOME=~/.zplug
 source $ZPLUG_HOME/init.zsh
 
 zplug romkatv/powerlevel10k, as:theme, depth:1 ## << Powerlevel10k
@@ -27,8 +26,4 @@ zplug load
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-export PATH=/Users/chacha/go/bin:$PATH
-export PATH=/usr/bin:$PATH
-export PATH=$PATH:$HOME/bin
 
