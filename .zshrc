@@ -1,4 +1,5 @@
 python3 ~/.chacharc/draw.py -i ~/.chacharc/image.png -m RGB -a 1.5 -c 2 --auto w
+echo "\n\n\n\n"
 
 ZSH_DISABLE_COMPFIX="true"
 
