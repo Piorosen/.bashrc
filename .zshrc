@@ -1,3 +1,5 @@
+python3 ~/.chacharc/draw.py -i ~/.chacharc/image.png -m RGB -a 1.5 -c 2 --auto w
+
 ZSH_DISABLE_COMPFIX="true"
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
