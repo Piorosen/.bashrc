@@ -398,15 +398,24 @@ img = Image.open(f)
 
 # Get the size of the terminal for autoscaling
 termsize = shutil.get_terminal_size()
-
+termsize = [termsize[0], termsize[1]]
 # here we set the new size of the image. The whole image is scaled by the scale factor given
 # in the command line arguments and we also correct the image with the width correction factor
 # so that the resulting asciii image has approximately the same aspect ratio as the original
 # image.
+
+if termsize[0] > termsize[1] * 5:
+    args.auto = 'h'
+    
+    
 if args.auto == "h":
+    termsize[1] -= 10
     auto_factor = termsize[1] / img.size[1]
 else:
     auto_factor = termsize[0] / (img.size[0] * WCF)
+
+
+    
 
 S = ( round(img.size[0]*SC*WCF*auto_factor), round(img.size[1]*SC*auto_factor) )
 
