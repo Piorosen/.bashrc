@@ -12,6 +12,10 @@ ln .vimrc ~/.vimrc
 mkdir ~/.chacharc
 ln -s $(pwd)/.chacharc/ ~/.chacharc
 
+brew tap homebrew-ffmpeg/ffmpeg
+brew install homebrew-ffmpeg/ffmpeg/ffmpeg --with-libcaca
+# ffmpeg -i ~/.chacharc/NyanCat.mp4 -c:v rawvideo -pix_fmt rgb24 -f caca -
+
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 source ~/.zshrc

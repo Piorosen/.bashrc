@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+import subprocess
+import threading
+import sys
+import keyboard
+import os
+
+process = None
+
+def run_ffmpeg():
+    global process
+    
+    # ffmpeg 명령을 실행하여 비디오에서 소리를 제거하고 caca 출력 형식으로 변환
+    command = [
+        "ffmpeg", "-stream_loop", "-1",
+        "-i", os.path.expanduser("~/.chacharc/NyanCat.mp4"),
+        "-map_metadata", "-1",  # 메타데이터 제거
+        "-an",                   # 오디오 제거
+        "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-vf", "fps=fps=25", "-vsync", "0",
+        "-f", "caca", "-",
+        "-loglevel", "quiet"     # 로그 숨김
+    ]
+    
+    process = subprocess.Popen(command)
+
+def wait_for_keypress():
+    # 키 입력을 기다림 (아무 키나 입력하면 종료)
+    input("\nPress any key to stop the program...\n")
+    process.kill
+    sys.exit()
+
+# 두 가지 스레드를 사용하여 ffmpeg를 실행하고 키 입력을 기다림
+ffmpeg_thread = threading.Thread(target=run_ffmpeg)
+ffmpeg_thread.start()
+
+wait_for_keypress()
