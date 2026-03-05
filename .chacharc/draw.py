@@ -397,7 +397,7 @@ mode = args.mode
 img = Image.open(f)
 
 # Get the size of the terminal for autoscaling
-termsize = shutil.get_terminal_size()
+termsize = shutil.get_terminal_size((80, 24))
 termsize = [termsize[0], termsize[1]]
 # here we set the new size of the image. The whole image is scaled by the scale factor given
 # in the command line arguments and we also correct the image with the width correction factor
@@ -409,19 +409,22 @@ if termsize[0] > termsize[1] * 5:
     
     
 if args.auto == "h":
-    termsize[1] -= 10
-    auto_factor = termsize[1] / img.size[1]
+    termsize[1] = max(1, termsize[1] - 10)
+    auto_factor = termsize[1] / max(1, img.size[1])
 else:
-    auto_factor = termsize[0] / (img.size[0] * WCF)
+    auto_factor = termsize[0] / max(1, (img.size[0] * WCF))
 
 
     
 
-S = ( round(img.size[0]*SC*WCF*auto_factor), round(img.size[1]*SC*auto_factor) )
+S = (
+    max(1, round(img.size[0] * SC * WCF * auto_factor)),
+    max(1, round(img.size[1] * SC * auto_factor)),
+)
 
 # Here we resize the image and add up the rgb values of the image to get the overall intensity
 # values for each pixel.
-img = np.sum( np.asarray( img.resize(S) ), axis=2)  
+img = np.sum(np.asarray(img.resize(S)), axis=2).astype(float)
 
 # Here we scale the smallest intensity value to zero
 img -= img.min()
@@ -433,7 +436,11 @@ img -= img.min()
 # Finally the scaled intensities are multiplied with the biggest index of the character array chars (n-1)
 # and, later, truncated to int which basically maps every intensity value of the original image to an index 
 # of the ascii character array. 
-img = (1.0 - img/img.max())**GCF*(chars.size-1)
+max_value = img.max()
+if max_value == 0:
+    img = np.zeros_like(img)
+else:
+    img = (1.0 - img/max_value)**GCF*(chars.size-1)
  
 # Here we assemble and print our ascii art. The image is truncated to int and the entire image matrix is passed
 # as an index to the character array. This is possible because numpy actually allows indices to be vectors or matrices
@@ -469,4 +476,3 @@ for line,l in zip(rgb_arr, img.astype(int)):
             pix = "\x1b[38;5;{}m{}\x1b[0m".format(c,p)
         print(pix, end="")
     print()
-

@@ -1,62 +1,184 @@
-set rtp+=~/.vim/bundle/Vundle.vim
+set nocompatible
+filetype plugin indent on
+syntax on
 
-call vundle#begin()
-
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'bling/vim-airline'
-Plugin 'tpope/vim-abolish'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'taglist.vim'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'scrooloose/syntastic'
-Plugin 'scrooloose/nerdtree'
-" Plugin 'Valloric/YouCompleteMe'
-
-
-
-call vundle#end() 
-
-
-
-set hlsearch " 검색어 하이라이팅
-set nu " 줄번호
-set autoindent " 자동 들여쓰기
-set scrolloff=2
-set wildmode=longest,list
-set ts=4 "tag select
-au Bufenter *.\(c\|cpp\|h\|py\|java\) set et
-set sts=4 "st select
-set sw=1 " 스크롤바 너비
-set autowrite " 다른 파일로 넘어갈 때 자동 저장
-set autoread " 작업 중인 파일 외부에서 변경됬을 경우 자동으로 불러옴
-set cindent " C언어 자동 들여쓰기
-set bs=eol,start,indent
-set history=256
-set laststatus=2 " 상태바 표시 항상
-"set paste " 붙여넣기 계단현상 없애기
-set shiftwidth=4 " 자동 들여쓰기 너비 설정
-set showmatch " 일치하는 괄호 하이라이팅
-set smartcase " 검색시 대소문자 구별
-set smarttab
-set smartindent
-set softtabstop=4
+set number
+set mouse=a
+set ttymouse=sgr
+set laststatus=2
+set statusline=%f\ %h%m%r%=%{&filetype==''?'noft':&filetype}\ [%{&fileencoding==''?&encoding:&fileencoding}]\ %l:%c\ [%p%%]\ %{strftime('%H:%M')}
 set tabstop=4
-set bg=dark
-set ruler " 현재 커서 위치 표시
-set incsearch
-set title
-set statusline=\ %<%l:%v\ [%P]%=%a\ %h%m%r\ %F\
-set term=screen-256color
-:set cursorline
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+set hidden
 
-" 마지막으로 수정된 곳에 커서를 위치함
-" 구문 강조 사용
-if has("syntax")
-    syntax on
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
-" 컬러 스킴 사용
-" colorscheme peachpuff
 
-let g:airline_powerline_fonts = 1
-nmap <F8> :NERDTreeToggle<CR>
+call plug#begin('~/.vim/plugged')
+Plug 'preservim/nerdtree'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call plug#end()
 
+let g:NERDTreeWinSize = 30
+let g:NERDTreeMouseMode = 2
+let g:layout_initialized = 0
+let g:coc_global_extensions = [
+      \ 'coc-clangd',
+      \ 'coc-pyright',
+      \ 'coc-go',
+      \ 'coc-rust-analyzer',
+      \ 'coc-snippets',
+      \ 'coc-json'
+      \ ]
+
+set signcolumn=yes
+set updatetime=300
+set shortmess+=c
+
+" Quit all windows/tabs at once.
+nnoremap <silent> <C-q> :qall!<CR>
+nnoremap <silent> <leader>q :qall<CR>
+nnoremap <silent> <leader>Q :qall!<CR>
+nnoremap <silent> <C-w>q :wq<CR>
+tnoremap <silent> <C-q> <C-\><C-n>:qall!<CR>
+tnoremap <silent> <leader>q <C-\><C-n>:qall<CR>
+tnoremap <silent> <leader>Q <C-\><C-n>:qall!<CR>
+
+" IDE/LSP shortcuts (coc.nvim)
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <silent><expr> <CR> pumvisible() ? coc#_select_confirm() : "\<CR>"
+
+nnoremap <silent> gd <Plug>(coc-definition)
+nnoremap <silent> gy <Plug>(coc-type-definition)
+nnoremap <silent> gi <Plug>(coc-implementation)
+nnoremap <silent> gr <Plug>(coc-references)
+nnoremap <silent> <leader>rn <Plug>(coc-rename)
+nnoremap <silent> <leader>ca <Plug>(coc-codeaction-cursor)
+xnoremap <silent> <leader>ca <Plug>(coc-codeaction-selected)
+nnoremap <silent> [g <Plug>(coc-diagnostic-prev)
+nnoremap <silent> ]g <Plug>(coc-diagnostic-next)
+nnoremap <silent> <leader>f :call CocActionAsync('format')<CR>
+nnoremap <silent> K :call <SID>ShowDocumentation()<CR>
+
+function! s:ShowDocumentation() abort
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    execute 'h ' . expand('<cword>')
+  endif
+endfunction
+
+augroup CocConfig
+  autocmd!
+  autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup END
+
+function! s:FindNerdTreeWindow() abort
+  for w in range(1, winnr('$'))
+    if getbufvar(winbufnr(w), '&filetype') ==# 'nerdtree'
+      return w
+    endif
+  endfor
+  return -1
+endfunction
+
+function! s:FindTerminalWindow() abort
+  for w in range(1, winnr('$'))
+    if getbufvar(winbufnr(w), '&buftype') ==# 'terminal'
+      return w
+    endif
+  endfor
+  return -1
+endfunction
+
+function! s:FindEditorWindow() abort
+  for w in range(1, winnr('$'))
+    let l:bt = getbufvar(winbufnr(w), '&buftype')
+    let l:ft = getbufvar(winbufnr(w), '&filetype')
+    if l:bt !=# 'terminal' && l:ft !=# 'nerdtree'
+      return w
+    endif
+  endfor
+  return -1
+endfunction
+
+function! s:FocusNerdTreeWindow() abort
+  let l:w = s:FindNerdTreeWindow()
+  if l:w > 0
+    execute l:w . 'wincmd w'
+  endif
+endfunction
+
+function! s:FocusEditorWindow() abort
+  let l:w = s:FindEditorWindow()
+  if l:w > 0
+    execute l:w . 'wincmd w'
+  endif
+endfunction
+
+function! s:FocusTerminalWindow() abort
+  let l:w = s:FindTerminalWindow()
+  if l:w > 0
+    execute l:w . 'wincmd w'
+    startinsert
+  endif
+endfunction
+
+function! s:SetupFixedLayout() abort
+  if g:layout_initialized
+    return
+  endif
+
+  let g:layout_initialized = 1
+
+  if s:FindNerdTreeWindow() < 0
+    silent! NERDTree
+  endif
+
+  if s:FindEditorWindow() < 0
+    enew
+  endif
+
+  call s:FocusEditorWindow()
+
+  if s:FindTerminalWindow() < 0
+    botright 12split
+    " Use the existing split for terminal to avoid creating an extra window.
+    try
+      terminal ++curwin
+    catch
+      " Fallback if current buffer cannot be abandoned for ++curwin.
+      try
+        enew
+        terminal ++curwin
+      catch
+        botright 12terminal
+      endtry
+    endtry
+  endif
+
+  call s:FocusEditorWindow()
+endfunction
+
+" Focus shortcuts:
+" <C-j> -> NerdTree, <C-k> -> editor, <C-l> -> terminal
+nnoremap <silent> <C-j> :call <SID>FocusNerdTreeWindow()<CR>
+nnoremap <silent> <C-k> :call <SID>FocusEditorWindow()<CR>
+nnoremap <silent> <C-l> :call <SID>FocusTerminalWindow()<CR>
+tnoremap <silent> <C-j> <C-\><C-n>:call <SID>FocusNerdTreeWindow()<CR>
+tnoremap <silent> <C-k> <C-\><C-n>:call <SID>FocusEditorWindow()<CR>
+tnoremap <silent> <C-l> <C-\><C-n>:call <SID>FocusTerminalWindow()<CR>
+
+augroup FixedLayout
+  autocmd!
+  if !exists('g:chacha_noninteractive')
+    autocmd VimEnter * call s:SetupFixedLayout()
+    autocmd BufWinEnter,WinEnter * if &buftype ==# 'terminal' | setlocal nonumber norelativenumber | endif
+  endif
+augroup END

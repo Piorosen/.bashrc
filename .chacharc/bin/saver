@@ -1,37 +1,94 @@
 #!/usr/bin/env python3
 
 import subprocess
-import threading
 import sys
-import keyboard
 import os
+import shutil
+import argparse
 
-process = None
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Play a terminal screensaver using ffmpeg+caca."
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        default=os.path.expanduser("~/.chacharc/NyanCat.mp4"),
+        help="Video file path (default: ~/.chacharc/NyanCat.mp4)",
+    )
+    parser.add_argument(
+        "--fps",
+        type=int,
+        default=25,
+        help="Playback fps for terminal rendering (default: 25)",
+    )
+    parser.add_argument(
+        "--no-loop",
+        action="store_true",
+        help="Play once instead of looping forever",
+    )
+    return parser.parse_args()
 
-def run_ffmpeg():
-    global process
-    
-    # ffmpeg 명령을 실행하여 비디오에서 소리를 제거하고 caca 출력 형식으로 변환
+def ffmpeg_has_caca(ffmpeg_bin):
+    probe = subprocess.run(
+        [ffmpeg_bin, "-hide_banner", "-formats"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return " caca " in f"{probe.stdout}\n{probe.stderr}"
+
+def run_ffmpeg(args):
+    ffmpeg_bin = shutil.which("ffmpeg")
+    if ffmpeg_bin is None:
+        print("Error: ffmpeg is not installed or not in PATH.", file=sys.stderr)
+        return 1
+
+    if not ffmpeg_has_caca(ffmpeg_bin):
+        print(
+            "Error: ffmpeg does not support the 'caca' output format on this machine.",
+            file=sys.stderr,
+        )
+        return 1
+
+    input_video = os.path.expanduser(args.input)
+    if not os.path.isfile(input_video):
+        print(f"Error: video not found: {input_video}", file=sys.stderr)
+        return 1
+
     command = [
-        "ffmpeg", "-stream_loop", "-1",
-        "-i", os.path.expanduser("~/.chacharc/NyanCat.mp4"),
-        "-map_metadata", "-1",  # 메타데이터 제거
-        "-an",                   # 오디오 제거
-        "-c:v", "rawvideo", "-pix_fmt", "rgb24", "-vf", "fps=fps=25", "-vsync", "0",
-        "-f", "caca", "-",
-        "-loglevel", "quiet"     # 로그 숨김
+        ffmpeg_bin,
     ]
-    
+    if not args.no_loop:
+        command.extend(["-stream_loop", "-1"])
+    command.extend([
+        "-i", input_video,
+        "-map_metadata", "-1",
+        "-an",
+        "-c:v", "rawvideo",
+        "-pix_fmt", "rgb24",
+        "-vf", f"fps=fps={args.fps}",
+        "-vsync", "0",
+        "-f", "caca", "-",
+        "-hide_banner",
+        "-loglevel", "error",
+    ])
+
     process = subprocess.Popen(command)
+    try:
+        process.wait()
+        return process.returncode
+    except KeyboardInterrupt:
+        process.terminate()
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            process.kill()
+        return 130
 
-def wait_for_keypress():
-    # 키 입력을 기다림 (아무 키나 입력하면 종료)
-    input("\nPress any key to stop the program...\n")
-    process.kill
-    sys.exit()
+def main():
+    args = parse_args()
+    return run_ffmpeg(args)
 
-# 두 가지 스레드를 사용하여 ffmpeg를 실행하고 키 입력을 기다림
-ffmpeg_thread = threading.Thread(target=run_ffmpeg)
-ffmpeg_thread.start()
-
-wait_for_keypress()
+if __name__ == "__main__":
+    sys.exit(main())
