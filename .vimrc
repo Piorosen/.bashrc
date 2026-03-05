@@ -1,6 +1,7 @@
 set nocompatible
 filetype plugin indent on
 syntax on
+let mapleader = " "
 
 set number
 set mouse=a
@@ -50,9 +51,7 @@ tnoremap <silent> <leader>q <C-\><C-n>:qall<CR>
 tnoremap <silent> <leader>Q <C-\><C-n>:qall!<CR>
 
 " IDE/LSP shortcuts (coc.nvim)
-inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<C-h>"
-inoremap <silent><expr> <CR> pumvisible() ? coc#_select_confirm() : "\<CR>"
+inoremap <silent><expr> <C-Space> coc#refresh()
 
 nnoremap <silent> gd <Plug>(coc-definition)
 nnoremap <silent> gy <Plug>(coc-type-definition)
@@ -66,6 +65,13 @@ nnoremap <silent> ]g <Plug>(coc-diagnostic-next)
 nnoremap <silent> <leader>f :call CocActionAsync('format')<CR>
 nnoremap <silent> K :call <SID>ShowDocumentation()<CR>
 
+" Simple IDE keys
+nnoremap <silent> <F8> :NERDTreeToggle<CR>
+nnoremap <silent> <F12> <Plug>(coc-definition)
+nnoremap <silent> <S-F12> <Plug>(coc-references)
+nnoremap <silent> <F2> <Plug>(coc-rename)
+nnoremap <silent> <F4> :call CocActionAsync('format')<CR>
+
 function! s:ShowDocumentation() abort
   if CocAction('hasProvider', 'hover')
     call CocActionAsync('doHover')
@@ -77,6 +83,11 @@ endfunction
 augroup CocConfig
   autocmd!
   autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup END
+
+augroup IdeFormatOnSave
+  autocmd!
+  autocmd BufWritePre *.c,*.cc,*.cpp,*.h,*.hpp,*.py,*.go,*.rs silent! call CocAction('format')
 augroup END
 
 function! s:FindNerdTreeWindow() abort
