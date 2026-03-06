@@ -85,6 +85,11 @@ augroup CocConfig
   autocmd CursorHold * silent call CocActionAsync('highlight')
 augroup END
 
+augroup IdeIndent4
+  autocmd!
+  autocmd FileType c,cpp,python,go,rust setlocal tabstop=4 softtabstop=4 shiftwidth=4 expandtab
+augroup END
+
 augroup IdeFormatOnSave
   autocmd!
   autocmd BufWritePre *.c,*.cc,*.cpp,*.h,*.hpp,*.py,*.go,*.rs silent! call CocAction('format')

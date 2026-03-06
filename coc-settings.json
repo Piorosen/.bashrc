@@ -1,3 +1,32 @@
 {
-  "snippets.ultisnips.pythonPrompt": false
+  "snippets.ultisnips.pythonPrompt": false,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "clangd.fallbackFlags": [
+    "--fallback-style={BasedOnStyle: LLVM, IndentWidth: 4, TabWidth: 4, UseTab: Never}"
+  ],
+  "rust-analyzer.rustfmt.extraArgs": [
+    "--config",
+    "tab_spaces=4"
+  ],
+  "[c]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[cpp]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[rust]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[go]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false
+  }
 }
