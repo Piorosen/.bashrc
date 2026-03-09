@@ -13,6 +13,14 @@ cd ~/.bashrc
 ./install.sh --theme powerlevel10k
 ```
 
+Linux branch behavior in `install.sh`:
+- installs and links the zsh configuration (`~/.zshrc`)
+- applies the selected theme config into `~/.config/chacha-shell/theme.zsh`
+- ensures `~/.chacharc/bin/cinamol` and `~/.chacharc/bin/saver` are executable
+- checks whether ffmpeg has `caca` format support and prints warnings if missing
+- for the current user running install: tries to pin login shell to `zsh` via `chsh`
+- for the current user running install: adds a guarded `~/.bashrc` handoff block to always enter `zsh` from interactive bash sessions
+
 Available theme values:
 - `powerlevel10k`
 - `spaceship`
